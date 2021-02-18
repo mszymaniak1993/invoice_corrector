@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 #top_secret file
-.txt
+*.txt
