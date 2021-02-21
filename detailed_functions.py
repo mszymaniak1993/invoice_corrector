@@ -2,20 +2,22 @@ from selenium import webdriver
 import time
 import datetime
 import calendar
+from db import Database
+from selenium.webdriver.common.action_chains import ActionChains
 
 browser = webdriver.Chrome("chromedriver.exe")
 year_now = datetime.datetime.now().year
 month_now = datetime.datetime.now().month
 day_now = datetime.datetime.now().day
 
-def log_in():
+def log_in(login_text, password_text):
     with open('top_secret.txt', 'r') as reader:
         url = reader.readlines()[0]
     browser.get(url)
     login = browser.find_element_by_id('form_login_username')
-    login.send_keys('mszymaniak@superksiegowa.pl')
+    login.send_keys(login_text)
     password = browser.find_element_by_id('form_login_password')
-    password.send_keys('dsfk938u')
+    password.send_keys(password_text)
     zaloguj = browser.find_element_by_id('form_login_submit')
     zaloguj.click()
     time.sleep(1)
@@ -35,11 +37,26 @@ def move_to_sale_invoice():
     invoicing.click()
     time.sleep(1)
 
-def search_invoice():
+def change_dates(number):
+    number = number.split('/')
+    date_from = browser.find_element_by_xpath("//input[@type='text'][@data-name='date_date_from']")
+    date_from.click()
+    date_from.clear()
+    date_from.send_keys('{}-{}-{}'.format(str(number[3]), str(number[2]), str(last_day_month(number[3], number[2]))))
+    ActionChains(browser).move_by_offset(20, 20).click().perform()
+
+    date_to = browser.find_element_by_xpath("//input[@type='text'][@data-name='date_date_to']")
+    date_to.click()
+    date_to.clear()
+    date_to.send_keys('{}-{}-{}'.format(str(number[3]), str(number[2]), str(last_day_month(number[3], number[2]))))
+    ActionChains(browser).move_by_offset(-20, -20).click().perform()
+
+def search_invoice(number):
     invoice_search = browser.find_element_by_id('dt-sale-search')
-    year = datetime.date.today().year
-    invoice_search.send_keys('A1/1/{}'.format(year))
-    time.sleep(1)
+    invoice_search.click()
+    invoice_search.clear()
+    invoice_search.send_keys('{}'.format(number))
+    time.sleep(2)
     document = browser.find_element_by_class_name('va-middle')
     document.click()
     time.sleep(1)
@@ -56,17 +73,15 @@ def change_exhibit_date():
     exhibit_date.send_keys('{}-{}-{}'.format(str(year_now), str(month_now).zfill(2), str(day_now)))
     time.sleep(1)
 
-def change_sale_date():
+def last_day_month(year, month):
+    return calendar.monthrange(int(year), int(month))[1]
+
+def change_sale_date(number):
+    number = number.split('/')
     sale_date = browser.find_element_by_id('form_doc_dateofsale')
     sale_date.click()
     sale_date.clear()
-
-    def last_day_of_month(any_day):
-        next_month = any_day.replace(day=28) + datetime.timedelta(days=4) # this will never fail
-        return (next_month - datetime.timedelta(days=next_month.day)).strftime('%Y-%m-%d')
-    year = datetime.date.today().year
-    month = datetime.datetime.today().month-1
-    sale_date.send_keys(str(last_day_of_month(datetime.date(year, month, 10))))
+    sale_date.send_keys('{}-{}-{}'.format(str(number[3]), str(number[2]), str(last_day_month(number[3], number[2]))))
     time.sleep(1)
 
 def change_accounting_period():
@@ -90,21 +105,25 @@ def why_correction():
     time.sleep(1)
 
 def change_position():
-    position = browser.find_element_by_class_name('ml-2')
-    position.click()
-    quantity = browser.find_element_by_id('input-41')
-    quantity.click()
-    quantity.send_keys('0')
-    save_position = browser.find_element_by_xpath('//button[.="Zapisz"]')
-    save_position.click()
-    time.sleep(1)
+    positions = len(browser.find_elements_by_xpath("//tr[@class='cursor-pointer item']"))
+    for i in range(positions):
+        position = browser.find_elements_by_class_name('ml-2')[i]
+        position.click()
+        quantity = browser.find_element_by_xpath("//div[@class='flex xs1']/div/div/div/div/input")
+        quantity.click()
+        quantity.send_keys('0')
+        save_position = browser.find_element_by_xpath('//button[.="Zapisz"]')
+        save_position.click()
+        time.sleep(1)
 
-def finish_correction():
+def finish_correction(id, db):
     finish_it = browser.find_element_by_id('form_doc_submit')
     finish_it.click()
     time.sleep(10)
+    db.created(id)
 
-def download_invoce_correction():
+def download_invoce_correction(id, db):
     download = browser.find_element_by_class_name('flat-button')
     download.click()
     time.sleep(10)
+    db.downloaded(id)

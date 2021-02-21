@@ -1,19 +1,20 @@
 from detailed_functions import *
 
-def preparation():
-    log_in()
+def preparation(login_text, password_text):
+    log_in(login_text, password_text)
     log_into_company()
     cookie_killer()
 
-def create_correction_invoice():
+def create_correction_invoice(id, number, db):
     move_to_sale_invoice()
-    search_invoice()
+    change_dates(number)
+    search_invoice(number)
     correction_press()
     change_exhibit_date()
-    change_sale_date()
+    change_sale_date(number)
     change_accounting_period()
     change_sequence()
     why_correction()
     change_position()
-    finish_correction()
-    download_invoce_correction()
+    finish_correction(id, db)
+    download_invoce_correction(id, db)
