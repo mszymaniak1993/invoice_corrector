@@ -99,6 +99,11 @@ def change_sequence():
     kmf.click()
     time.sleep(1)
 
+def get_correction_number():
+    global correction_number
+    correction_number = browser.find_element_by_xpath('//input[@id="form_doc_no"][@value]').get_attribute('value')
+
+
 def why_correction():
     reason = browser.find_element_by_id('form_doc_correction_reason')
     reason.send_keys("Błędna aktywacja")
@@ -116,14 +121,14 @@ def change_position():
         save_position.click()
         time.sleep(1)
 
-def finish_correction(id, db):
+def finish_correction(number, db):
     finish_it = browser.find_element_by_id('form_doc_submit')
     finish_it.click()
     time.sleep(10)
-    db.created(id)
+    db.created(number)
 
-def download_invoce_correction(id, db):
+def download_invoce_correction(number, db):
     download = browser.find_element_by_class_name('flat-button')
     download.click()
-    time.sleep(10)
-    db.downloaded(id)
+    db.downloaded(number)
+    time.sleep(12)
