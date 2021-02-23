@@ -4,7 +4,7 @@ class Database:
     def __init__(self, db):
         self.conn = sqlite3.connect(db)
         self.cur = self.conn.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS invoice (id INTEGER PRIMARY KEY, invoice_number, is_created INTEGER, is_downloaded INTEGER, message)")
+        self.cur.execute("CREATE TABLE IF NOT EXISTS invoice (id INTEGER PRIMARY KEY, invoice_number, is_created INTEGER, is_downloaded INTEGER)")
         self.conn.commit()
 
     def fetch(self):
@@ -13,7 +13,7 @@ class Database:
         return rows
 
     def insert(self, invoice_number):
-        self.cur.execute("INSERT INTO invoice VALUES (NULL, ?, 0, 0, '')", (invoice_number,))
+        self.cur.execute("INSERT INTO invoice VALUES (NULL, ?, 0, 0)", (invoice_number,))
         self.conn.commit()
 
     def remove(self, invoice_number):
@@ -31,10 +31,6 @@ class Database:
     def downloaded(self, number):
         self.cur.execute("UPDATE invoice SET is_downloaded=1 WHERE invoice_number=?", (number,))
         self.conn.commit()
-    """
-    def message(self, invoice_number, correct_number):
-        self.cur.execute("UPDATE invoice SET message='Dla faktury {} wystawiono korekte {}' WHERE invoice_number=?".format(invoice_number, correct_number), (invoice_number))
-        self.conn.commit()"""
 
     def __del__(self):
         self.conn.close()

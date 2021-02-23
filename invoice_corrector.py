@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import messagebox
 from db import Database
 from grouped_functions import *
+from pathlib import Path
+import subprocess
 
 db = Database('invoice.db')
 
@@ -41,9 +43,15 @@ def remove_item():
 def start():
     window.iconify()
     preparation(login_text.get(), password_text.get())
+    now = datetime.datetime.now().strftime("%d_%m_%Y %H_%M_%S")
+    folder = Path('Wystawione korekty/').mkdir(exist_ok=True)
     for invoice in db.fetch():
         number = invoice[0]
-        create_correction_invoice(number, db)
+        create_correction_invoice(number, db, now)
+    messagebox.showinfo("Korektor faktur", "Zakończono wystawianie korekt")
+    window.destroy()
+    browser.quit()
+    subprocess.run(["notepad","Wystawione korekty/{}.txt".format(now)])
 
 #Create window object
 window = Tk()

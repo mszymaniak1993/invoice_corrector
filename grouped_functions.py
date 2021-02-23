@@ -5,7 +5,7 @@ def preparation(login_text, password_text):
     log_into_company()
     cookie_killer()
 
-def create_correction_invoice(number, db):
+def create_correction_invoice(number, db, now):
     move_to_sale_invoice()
     change_dates(number)
     search_invoice(number)
@@ -18,4 +18,4 @@ def create_correction_invoice(number, db):
     why_correction()
     change_position()
     finish_correction(number, db)
-    download_invoce_correction(number, db)
+    download_invoce_correction(number, db, now)

@@ -5,6 +5,7 @@ import calendar
 from db import Database
 from selenium.webdriver.common.action_chains import ActionChains
 
+global browser
 browser = webdriver.Chrome("chromedriver.exe")
 year_now = datetime.datetime.now().year
 month_now = datetime.datetime.now().month
@@ -59,7 +60,7 @@ def search_invoice(number):
     time.sleep(2)
     document = browser.find_element_by_class_name('va-middle')
     document.click()
-    time.sleep(1)
+    time.sleep(2)
 
 def correction_press():
     correction = browser.find_element_by_link_text("KOREKTA")
@@ -100,9 +101,8 @@ def change_sequence():
     time.sleep(1)
 
 def get_correction_number():
-    global correction_number
-    correction_number = browser.find_element_by_xpath('//input[@id="form_doc_no"][@value]').get_attribute('value')
-
+    global correct_number
+    correct_number = browser.find_element_by_xpath('//input[@id="form_doc_no"][@value]').get_attribute('value')
 
 def why_correction():
     reason = browser.find_element_by_id('form_doc_correction_reason')
@@ -127,8 +127,11 @@ def finish_correction(number, db):
     time.sleep(10)
     db.created(number)
 
-def download_invoce_correction(number, db):
+def download_invoce_correction(number, db, now):
     download = browser.find_element_by_class_name('flat-button')
     download.click()
     db.downloaded(number)
-    time.sleep(12)
+    time.sleep(15)
+    
+    with open ('Wystawione korekty/{}.txt'.format(now), 'a') as file:
+        print('Dla faktury {} wystawiono korekte {}'.format(number, correct_number), file = file) 
